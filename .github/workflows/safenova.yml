@@ -65,5 +65,3 @@ jobs:
           tag_name: android-build
           name: Android Build
           files: SafeNova.apk
-          draft: false
-          prerelease: true
