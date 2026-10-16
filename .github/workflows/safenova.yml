@@ -37,7 +37,7 @@ jobs:
           npx cap init "SafeNova" "com.dosx.safenova" --web-dir "SafeNova/src"
           npx cap add android
 
-      - name: Fix Kotlin Duplicate Classes
+      - name: Fix Kotlin & Setup Signing
         run: |
           cat << 'EOF' >> android/app/build.gradle
           configurations.all {
@@ -48,25 +48,18 @@ jobs:
               }
           }
           EOF
+          
+          sed -i 's/release {/release {\n            signingConfig signingConfigs.debug/g' android/app/build.gradle
 
       - name: Build Release APK
         run: |
           cd android
           chmod +x gradlew
-          # assembleRelease statt assembleDebug
           ./gradlew assembleRelease
-
-      - name: Sign Release APK
-        uses: r0adkll/sign-android-release@v1
-        id: sign_app
-        with:
-          releaseDirectory: android/app/build/outputs/apk/release
-          signingKeyBase64: '' # Leer lassen = nutzt automatisch einen generischen Test-Schlüssel
 
       - name: Rename APK
         run: |
-          # Der signierte Build wird als SafeNova.apk umbenannt
-          mv ${{steps.sign_app.outputs.signedReleaseFile}} SafeNova.apk
+          mv android/app/build/outputs/apk/release/app-release.apk SafeNova.apk
 
       - name: Create / Update Release
         uses: softprops/action-gh-release@v2
